@@ -1,0 +1,10 @@
+pandas == 1.5.2
+numpy  == 1.24.2
+streamlit == 1.16.0
+streamlit_option_menu == 0.3.2
+streamlit_authenticator == 0.2.1
+# pickle 
+pathlib == 1.0.1
+plotly.express == 0.4.1
+mysql.connector == 2.2.9
+mysql-connector-python == 8.0.32

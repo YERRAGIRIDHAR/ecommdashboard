@@ -50,3 +50,9 @@ ordersCountByTotalAmount3 = "select COUNT(order_id) as 'No Of Orders' from ecomm
 ordersCountByTotalAmount2 = "select COUNT(order_id) as 'No Of Orders' from ecomm.orders where orders.total_amount > 100 and orders.total_amount >= 300"
 
 ordersCountByTotalAmount1 = "select COUNT(order_id) as 'No Of Orders' from ecomm.orders where orders.total_amount <= 100"
+
+ordersWithStatusWeek = "SELECT DATE(order_track_update_time) as Ordered_date, order_id, status_cd, DATE(estimated_time) as Estimated_date FROM ecomm.order_status WHERE (order_track_update_time != 0 OR last_update_dt_tm != 0) AND order_track_update_time >= CURDATE() - INTERVAL 1 WEEk"
+
+ordersWithStatusMONTH = "SELECT DATE(order_track_update_time) as Ordered_date, order_id, status_cd, DATE(estimated_time) as Estimated_date FROM ecomm.order_status WHERE (order_track_update_time != 0 OR last_update_dt_tm != 0) AND order_track_update_time >= CURDATE() - INTERVAL 1 MONTH"
+
+ordersWithStatusYear = "SELECT DATE(order_track_update_time) as Ordered_date, order_id, status_cd, DATE(estimated_time) as Estimated_date FROM ecomm.order_status WHERE (order_track_update_time != 0 OR last_update_dt_tm != 0) AND order_track_update_time >= CURDATE() - INTERVAL 1 YEAR"

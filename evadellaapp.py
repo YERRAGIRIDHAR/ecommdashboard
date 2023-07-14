@@ -6,10 +6,13 @@ import streamlit as st
 from streamlit_option_menu import option_menu
 import streamlit_authenticator as stauth
 from streamlit import session_state as state
-import mysql.connector
-# from evadella_mysql import *
+# import mysql.connector
+# import base64
+from evadella_mysql import *
 import plotly.express as px
-from evadellalogin import * 
+from evadellalogin import *
+
+sql = open('task.sql', mode='r', encoding='utf-8-sig').read()
 
 st.set_page_config(
     page_title="EvaDella App",
@@ -17,57 +20,6 @@ st.set_page_config(
     layout="wide",  
     initial_sidebar_state="collapsed"
 )
-
-mydb = mysql.connector.connect(
-    host = "localhost",
-    
-    user = "root",
-    password = "swapna2021",
-    database = "ecomm"
-)
-
-getOrderStatusDf = "SELECT * FROM ecomm.order_status"
-
-getOrdersDf = "SELECT * FROM ecomm.orders"
-
-# todayOrdersDetails = "SELECT DATE(order_submit_dt_tm) as 'Date', order_id, total_amount FROM ecomm.orders WHERE DATE(order_submit_dt_tm) = CURDATE()"
-
-todayOrdersDetails = "SELECT DATE(order_submit_dt_tm) as 'Date', ROUND(COUNT(order_id)) as 'Count', ROUND(SUM(IFNULL(total_amount, 0))) as 'Amount' FROM ecomm.orders WHERE DATE(order_submit_dt_tm) = CURDATE()"
-
-averageOrdersBy30Days = "SELECT DATE(order_submit_dt_tm) as 'Date', ROUND(COUNT(order_id)/COUNT(DISTINCT DATE(order_submit_dt_tm))) as 'Count', ROUND(AVG(total_amount)) as 'Amount' FROM ecomm.orders WHERE DATE(order_submit_dt_tm) >= (CURDATE()- INTERVAL 1 MONTH)"
-
-orderCountByStatus = "SELECT DATE(order_track_update_time) as 'Date', status_cd, order_id FROM ecomm.order_status WHERE order_status.order_track_update_time != 0"
-
-filterOrderStatusDf = "SElECT order_id, status_cd, estimated_time FROM ecomm.order_status"
-
-ordersCount = "SELECT COUNT(order_id) as 'No Of Orders', order_id, DATE(order_submit_dt_tm) as 'Date', DAY (order_submit_dt_tm) as 'Day', DAYNAME(order_submit_dt_tm) as 'Day Name', MONTHNAME(order_submit_dt_tm) as 'Month Name', YEAR(order_submit_dt_tm) as 'Year' FROM ecomm.orders GROUP BY DATE(order_submit_dt_tm)" 
-
-currentMonthOrders = "SELECT COUNT(order_id) as 'No Of Orders', order_id, coupon_applied, DATE(order_submit_dt_tm) as 'Date', DAY (order_submit_dt_tm) as 'Day', DAYNAME(order_submit_dt_tm) as 'Day Name', MONTHNAME(order_submit_dt_tm) as 'Month Name', YEAR(order_submit_dt_tm) as 'Year' FROM ecomm.orders WHERE MONTH(order_submit_dt_tm) = MONTH(CURDATE() - INTERVAL 1 MONTH) GROUP BY DATE(order_submit_dt_tm)"
-
-unShippedordersWeekCount = "select order_id, COUNT(order_id) as 'No Of Orders', DATE(order_submit_dt_tm) as Date, DAY (order_submit_dt_tm) as 'Day', DAYNAME(order_submit_dt_tm) as 'Day Name', MONTHNAME(order_submit_dt_tm) as 'Month Name', YEAR(order_submit_dt_tm) as 'Year' from orders o WHERE o.status <> 'OPEN' AND o.order_id NOT IN (select distinct os.order_id from order_status os WHERE os.status_cd = 'Shipped') AND o.order_submit_dt_tm >= ( DATE_SUB(NOW(), INTERVAL 1 WEEK)) GROUP BY DATE(order_submit_dt_tm)"
-
-unShippedordersByDaysCount = "select DATE(order_submit_dt_tm) as 'Date', order_id, COUNT(order_id) as 'No Of Orders' from orders o WHERE o.status <> 'OPEN' AND o.order_id NOT IN (select distinct os.order_id from order_status os WHERE os.status_cd = 'Shipped') AND o.order_submit_dt_tm >= ( CURDATE() - INTERVAL 10 DAY ) GROUP BY Date"
-
-ordersLastMonthCount = "select order_id, COUNT(order_id) as 'No Of Orders', DATE(order_submit_dt_tm) as 'Date', DAY (order_submit_dt_tm) as 'Day', DAYNAME(order_submit_dt_tm) as 'Day Name', MONTHNAME(order_submit_dt_tm) as 'Month Name', YEAR(order_submit_dt_tm) as 'Year' from ecomm.orders where orders.order_submit_dt_tm >= ( CURDATE() - INTERVAL 1 MONTH) GROUP BY DATE(order_submit_dt_tm)"
-
-ordersLastdaysCount = "select order_id, COUNT(order_id) as 'No Of Orders', DATE(order_submit_dt_tm) as 'Date', DAY (order_submit_dt_tm) as 'Day', DAYNAME(order_submit_dt_tm) as 'Day Name', MONTHNAME(order_submit_dt_tm) as 'Month Name', YEAR(order_submit_dt_tm) as 'Year' from ecomm.orders where orders.order_submit_dt_tm >= ( DATE_SUB(NOW(), INTERVAL 10 DAY)) GROUP BY DATE(order_submit_dt_tm)"
-
-ordersCountByCoupon = "select coupon_applied, count(order_id) as 'No Of Orders' from ecomm.orders where orders.coupon_applied <> '0' GROUP BY coupon_applied"
-
-unShippedordersMonthCount = "select order_id, COUNT(order_id) as 'No Of Orders', DATE(order_submit_dt_tm) as 'Date', DAY (order_submit_dt_tm) as 'Day', MONTHNAME(order_submit_dt_tm) as 'Month Name', YEAR(order_submit_dt_tm) as 'Year' from orders o WHERE o.status <> 'OPEN' AND o.order_id NOT IN (select distinct os.order_id from order_status os WHERE os.status_cd = 'Shipped') AND o.order_submit_dt_tm >= ( DATE_SUB(NOW(), INTERVAL 1 MONTH)) GROUP BY DATE(order_submit_dt_tm)"
-
-unShippedOrdersMonthCount1 = "select DATE(order_submit_dt_tm) as 'Date', status_cd, customer_id from orders o, order_status os WHERE o.status <> 'OPEN' AND o.order_id NOT IN (select distinct os.order_id from order_status os WHERE os.status_cd = 'Shipped') GROUP BY order_submit_dt_tm"
-
-ordersCountByTotalAmount5 = "select COUNT(order_id) as 'No Of Orders' from ecomm.orders where orders.total_amount > 1000"
-
-ordersCountByTotalAmount4 = "select COUNT(order_id) as 'No Of Orders' from ecomm.orders where orders.total_amount > 500 and orders.total_amount >= 1000"
-
-ordersCountByTotalAmount3 = "select COUNT(order_id) as 'No Of Orders' from ecomm.orders where orders.total_amount > 300 and orders.total_amount >= 500"
-
-ordersCountByTotalAmount2 = "select COUNT(order_id) as 'No Of Orders' from ecomm.orders where orders.total_amount > 100 and orders.total_amount >= 300"
-
-ordersCountByTotalAmount1 = "select COUNT(order_id) as 'No Of Orders' from ecomm.orders where orders.total_amount <= 100"
-
 
 # user authentication
 names = ["Giridhar", "Yerra"]
@@ -86,7 +38,7 @@ with file_path.open("rb") as file:
             usernames[1]:{
                 "name":names[1],
                 "password":hashed_passwords[1]
-                }            
+                }           
             }
         }
 
@@ -100,6 +52,13 @@ if authentication_status == False:
 
 if authentication_status: 
     state.authentication_status = True
+    st.balloons()
+    st.snow()
+    import time
+    import streamlit as st
+
+    with st.spinner('Wait for it...'):
+        time.sleep(2)
 
     page = st.sidebar.selectbox("Select a page", ["evadellaapp.py","evadellaapprawdata.py"])
 
@@ -112,8 +71,8 @@ if authentication_status:
         # Navigation Bar
         selected = option_menu(
             menu_title = None,
-            options = ["Operations", "Sales", "Inventory"],
-            icons = ["house", "book", ""],
+            options = ["Operations", "Sales", "Inventory", "Staff Metrics"],
+            icons = ["house", "book", "", ""],
             orientation = "horizontal",
         )
 
@@ -146,8 +105,8 @@ if authentication_status:
                 st.subheader("Today Orders/Average Orders - Count/Amount")
 
                 todayOrdersDetailsDf = pd.read_sql_query(todayOrdersDetails, mydb)
-                convert_dict = {'Count': int, 'Amount' :int}
-                todayOrdersDetailsDf = todayOrdersDetailsDf.astype(convert_dict)
+                # convert_dict = {'Count': int, 'Amount' :int}
+                # todayOrdersDetailsDf = todayOrdersDetailsDf.astype(convert_dict)
                 todayOrdersDetailsDf.iloc[0, 0] = 'Today Orders'
                 todayOrdersDetailsDf['Orders'] = todayOrdersDetailsDf['Date'].astype(str)
                 todayOrdersDetailsDf = todayOrdersDetailsDf.drop('Date', axis=1)
@@ -165,6 +124,116 @@ if authentication_status:
                 todayOrdersAverageOrdersDF.insert(0, 'Orders', firstcolumn)
 
                 st.table(todayOrdersAverageOrdersDF)
+
+            col10, col11 = st.columns(2)
+
+            with col10:
+                st.subheader("Orders By OrderStatus By Week, Month, Year")
+
+                option = st.selectbox(
+                '',
+                ('', 'Week', 'Month', 'Year'))
+
+                def week():
+                    orderStatusWeekData = pd.read_sql_query(ordersWithStatusWeek, mydb)
+                    def highlight_cell(val, column):
+                        if column == column == 'status_cd' and val == 'PAID':
+                            return 'color: blue'
+                        elif column == 'status_cd' and val == 'Delivered':
+                            return 'color: green'
+                        elif column == 'status_cd' and val == 'Shipped':
+                            return 'color: yellow'
+                        elif column =='status_cd' and val != 'Delivered':
+                            return 'color: red'
+                        else:
+                            return ''
+                    orderStatusWeekDataDF = orderStatusWeekData.style.apply(lambda x: [highlight_cell(val, column) for val, column in zip(x, x.index)], axis=1)
+
+                    st.dataframe(orderStatusWeekDataDF)
+                    # st.write('You selected:', option)
+
+                def month():
+                    orderStatusMonthData = pd.read_sql_query(ordersWithStatusMONTH, mydb)
+                    def highlight_cell(val, column):
+                        if column == column == 'status_cd' and val == 'PAID':
+                            return 'color: blue'
+                        elif column == 'status_cd' and val == 'Delivered':
+                            return 'color: green'
+                        elif column == 'status_cd' and val == 'SHIPPED':
+                            return 'color: yellow'
+                        elif column =='status_cd' and val != 'Delivered':
+                            return 'color: red'
+                        else:
+                            return ''
+
+                    orderStatusMonthDataDF = orderStatusMonthData.style.apply(lambda x: [highlight_cell(val, column) for val, column in zip(x, x.index)], axis=1)
+                    st.dataframe(orderStatusMonthDataDF)
+
+                # def year():
+                #     orderStatusYearData = pd.read_sql_query(ordersWithStatusYear, mydb)
+                #     def highlight_cell(val, column):
+                #         if column == 'status_cd' and val == 'PAID':
+                #             return 'color: blue'
+                #         elif column == 'status_cd' and val == 'Delivered':
+                #             return 'color: green'
+                #         elif column == 'status_cd' and val == 'Shipped':
+                #             return 'color: yellow'
+                #         elif column =='status_cd' and val != 'Delivered':
+                #             return 'color: red'
+                #         else:   
+                #             return ''
+                #     orderStatusYearDataDF = orderStatusYearData.style.apply(lambda x: [highlight_cell(val, column) for val, column in zip(x, x.index)], axis=1)
+
+                def year():
+                    # Load the threshold data from Excel
+                    thresholdData = pd.read_excel('Task/threshold_data.xlsx')
+                    
+                    # Read the orders data from SQL query
+                    orderStatusYearData = pd.read_sql_query(ordersWithStatusYear, mydb)
+                    
+                    def highlight_cell(val, column):
+                        if column == 'status_cd' and val == 'PAID':
+                            return 'color: ' + thresholdData.loc[(thresholdData['Column'] == "status_cd") & (thresholdData['Threshold'] == "blue"), 'Threshold'].values[0]
+                        elif column == 'status_cd' and val == 'Delivered':
+                            return 'color: ' + thresholdData.loc[(thresholdData['Column'] == "status_cd") & (thresholdData['Threshold'] == "green"), 'Threshold'].values[0]
+                        elif column == 'status_cd' and val == 'SHIPPED':
+                            return 'color: ' + thresholdData.loc[(thresholdData['Column'] == "status_cd") & (thresholdData['Threshold'] == "yellow"), 'Threshold'].values[0]
+                        elif column == 'status_cd' and val != 'Delivered':
+                            return 'color:red'
+                        # elif column in thresholdData.columns:
+                        #     threshold = thresholdData.loc[(thresholdData['Column'] == column), 'Threshold'].values[0]
+                        #     if val >= threshold:
+                        #         return 'color: ' + threshold
+                        #     else:
+                        #         return ''
+                        else:
+                            return ''
+                    
+                    orderStatusYearDataDF = orderStatusYearData.style.apply(lambda x: [highlight_cell(val, column) for val, column in zip(x, x.index)], axis=1)
+
+                    st.dataframe(orderStatusYearDataDF)
+
+                option_function_map = {
+                    'Week' : week,
+                    'Month' : month,
+                    'Year' : year,
+
+                    # Define other option-function mappings here
+                }
+
+                selected_function = option_function_map.get(option)
+                if selected_function:
+                    selected_function()
+            
+            with col11:
+
+                st.subheader("Orders Delay")
+
+                delayOrders = pd.read_sql(orderstatusByThreshould, mydb)
+
+                st.dataframe(delayOrders)
+
+
 
         if selected == "Sales":
 
@@ -243,6 +312,7 @@ if authentication_status:
                 st.table(totalOrderCountDf)
 
             with col9:
+
                 st.subheader('No Of Orders By Year')
 
                 ordersDf = pd.read_sql(ordersCount, mydb)
@@ -266,6 +336,25 @@ if authentication_status:
             fig = px.pie(ordersLastMonthCountDf, values='No Of Orders', names='Date')
 
             st.plotly_chart(fig)
+
+
+        if selected == "Staff Metrics":
+
+             # css applied
+            with open('C:/Users/ADMIN_2/Python_Giridhar/App Analytics/Analytics/databasestreamlit/Task/static/style.css') as f:
+                st.markdown(f'<style>{f.read()}</style>', unsafe_allow_html = True)
+
+            # columns for partition
+            col1, col2 = st.columns(2)
+
+            with col2:
+
+                st.subheader("Target Orders Given To Staff")
+
+                ordersByStaffActionDf = pd.read_sql(ordersByStaffAction, mydb)
+
+                st.dataframe(ordersByStaffActionDf)
+
 
 
     if page == "evadellaapprawdata.py":
