@@ -1,5 +1,13 @@
 import mysql.connector
 import os
+import toml
+
+config = toml.load("config.toml")
+mysql_host = os.environ.get('localhost')
+mysql_user = os.environ.get('root')
+mysql_password = os.environ.get('swapna2021')
+mysql_database = os.environ.get('ecomm')
+
 # @st.cache(hash_funcs={_mysql_connector.MySQL: my_hash_func})
 
 mydb = mysql.connector.connect(
@@ -9,6 +17,8 @@ mydb = mysql.connector.connect(
     password = "swapna2021",
     database = "ecomm"
 )
+
+mydb.close()
 
 getOrderStatusDf = "SELECT * FROM ecomm.order_status"
 
