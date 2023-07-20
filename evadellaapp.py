@@ -6,10 +6,9 @@ import streamlit as st
 from streamlit_option_menu import option_menu
 import streamlit_authenticator as stauth
 from streamlit import session_state as state
-# import base64
 from evadella_mysql import *
 import plotly.express as px
-# from evadellalogin import *
+
 
 sql = open('task.sql', mode='r', encoding='utf-8-sig').read()
 
@@ -75,6 +74,7 @@ if authentication_status:
             orientation = "horizontal",
         )
 
+        
         if selected == "Operations":
 
             # css applied
