@@ -10,6 +10,8 @@ mydb = mysql.connector.connect(
     database = "ecomm"
 )
 
+mydb.close()
+
 getOrderStatusDf = "SELECT * FROM ecomm.order_status"
 
 getOrdersDf = "SELECT * FROM ecomm.orders"
