@@ -51,8 +51,24 @@ ordersCountByTotalAmount2 = "select COUNT(order_id) as 'No Of Orders' from ecomm
 
 ordersCountByTotalAmount1 = "select COUNT(order_id) as 'No Of Orders' from ecomm.orders where orders.total_amount <= 100"
 
-ordersWithStatusWeek = "SELECT DATE(order_track_update_time) as Ordered_date, order_id, status_cd, DATE(estimated_time) as Estimated_date FROM ecomm.order_status WHERE (order_track_update_time != 0 OR last_update_dt_tm != 0) AND order_track_update_time >= CURDATE() - INTERVAL 1 WEEk"
+ordersWithStatusWeek = "SELECT DATE(order_track_update_time) as Ordered_date, order_id, status_cd, DATE(estimated_time) as Estimated_date, staff_cd FROM ecomm.order_status WHERE  order_track_update_time >= CURDATE() - INTERVAL 1 WEEK"
 
-ordersWithStatusMONTH = "SELECT DATE(order_track_update_time) as Ordered_date, order_id, status_cd, DATE(estimated_time) as Estimated_date FROM ecomm.order_status WHERE (order_track_update_time != 0 OR last_update_dt_tm != 0) AND order_track_update_time >= CURDATE() - INTERVAL 1 MONTH"
+ordersWithStatusMONTH = "SELECT DATE(order_track_update_time) as Ordered_date, order_id, status_cd, DATE(estimated_time) as Estimated_date, staff_cd FROM ecomm.order_status WHERE  order_track_update_time >= CURDATE() - INTERVAL 1 MONTH"
 
-ordersWithStatusYear = "SELECT DATE(order_track_update_time) as Ordered_date, order_id, status_cd, DATE(estimated_time) as Estimated_date FROM ecomm.order_status WHERE (order_track_update_time != 0 OR last_update_dt_tm != 0) AND order_track_update_time >= CURDATE() - INTERVAL 1 YEAR"
+ordersWithStatusYear = "SELECT DATE(order_track_update_time) as Ordered_date, order_id, status_cd, DATE(estimated_time) as Estimated_date, staff_cd FROM ecomm.order_status WHERE (order_track_update_time != 0 OR last_update_dt_tm != 0) AND order_track_update_time >= CURDATE() - INTERVAL 1 YEAR"
+
+orderstatusByThreshould = "SELECT os.order_id, os.status_cd, os.last_update_dt_tm, os.staff_cd FROM order_status os JOIN orders o ON os.order_id = o.order_id JOIN thresholds tt ON tt.name = os.status_cd WHERE os.order_track_ref = (SELECT MAX(order_track_ref) FROM order_status WHERE order_id = os.order_id) AND DATEDIFF(CURRENT_DATE, os.last_update_dt_tm) > tt.value"
+
+ordersByStaffAction = "SELECT os.staff_cd, s.staff_name, DATE(os.last_update_dt_tm) as Date, COUNT(os.order_id) as orderscount, opr.staff_role FROM order_status os JOIN op_staff s ON os.staff_cd = s.staff_cd JOIN op_staff_role r ON s.op_staff_id = r.op_staff_id JOIN op_role opr ON r.role_id = opr.role_id GROUP BY os.staff_cd"
+
+ordersOfOneMonth= "SELECT os.order_id, os.status_cd, os.last_update_dt_tm as order_date_time, os.staff_cd FROM order_status os WHERE os.last_update_dt_tm >= CURRENT_DATE - INTERVAL 1 MONTH"
+
+
+
+
+
+
+
+
+
+

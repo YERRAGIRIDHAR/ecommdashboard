@@ -3,7 +3,7 @@ import numpy as np
 import streamlit as st
 # import mysql.connector
 from evadellaapp import *
-from evadella_mysql import *
+from pages.evadella_mysql import *
 # from evadellalogin import *
 import streamlit_authenticator as stauth
 
