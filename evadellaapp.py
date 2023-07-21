@@ -81,7 +81,7 @@ if authentication_status:
         mysql_database = os.environ.get('ecomm')
 
         mydb = mysql.connector.connect(
-            host = "localhost",
+            host = "192.168.0.137",
             user = "root",
             port = "3306",
             password = "swapna2021",
