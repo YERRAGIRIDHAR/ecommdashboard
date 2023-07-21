@@ -2,7 +2,7 @@ import mysql.connector
 import os
 import toml
 
-config = toml.load("config.toml")
+# config = toml.load("config.toml")
 mysql_host = os.environ.get('localhost')
 mysql_user = os.environ.get('root')
 mysql_password = os.environ.get('swapna2021')
