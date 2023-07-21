@@ -13,7 +13,7 @@ import os
 import toml
 import plotly.express as px
 
-sql = open('task.sql', mode='r', encoding='utf-8-sig').read()
+# sql = open('task.sql', mode='r', encoding='utf-8-sig').read()
 
 st.set_page_config(
     page_title="EvaDella App",
