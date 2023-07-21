@@ -83,6 +83,7 @@ if authentication_status:
         mydb = mysql.connector.connect(
             host = "localhost",
             user = "root",
+            port = "3306",
             password = "swapna2021",
             database = "ecomm"
         )
